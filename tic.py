@@ -4,6 +4,9 @@ Created on Thu Aug 10 19:08:34 2023
 
 @author: Nate
 """
+from math import(floor)
+
+boardsize = 3
 
 def run_game(px,po):
     
@@ -14,43 +17,44 @@ def run_game(px,po):
     game_state = 0
     
     #X starts
-    next_player = -1 
+    curr_player = -1 
 
     while game_state == 0 :
         mx = 0
         my = 0
-        if next_player == -1:
-            mx,my = px.move(board)
+        if curr_player == -1:
+            idx = px.move(board)
         else:
-            mx,my = po.move(board)
-            
+            idx = po.move(board)
+        mx,my = idx_to_xy(idx)
+        
         #make sure space isn't taken
         if board[mx][my] == 0:
-            board[mx][my] = next_player
+            board[mx][my] = curr_player
         
         #check for victory
         #rows and cols
-        for i in range(3):
+        for i in range(boardsize):
             if board[i][0] == board[i][1] and board[i][0] == board[i][2]:
-                game_state = next_player
+                game_state = curr_player
             if board[0][i] == board[1][i] and board[0][i] == board[2][i]:
-                game_state = next_player
+                game_state = curr_player
         #check diagonals
             if board[0][0] == board[1][1] and board[0][0] == board[2][2]:
-                game_state = next_player
+                game_state = curr_player
             if board[2][0] == board[1][1] and board[2][0] == board[0][2]:
-                game_state = next_player
+                game_state = curr_player
         
         #check if board is full
         board_full = True
-        for i in range(3):
-            for j in range(3):
+        for i in range(boardsize):
+            for j in range(boardsize):
                 if board[i][j] == 0:
                     board_full = False
         
         if board_full == True:
             game_state = 2
-        next_player *= -1
+        curr_player *= -1
     
     #game is over
     if game_state == -1:
@@ -63,17 +67,49 @@ def run_game(px,po):
         px.tie(board)
         po.tie(board)
     
+    return
 
-class pc_player:
+def idx_to_xy(idx):
+    x = floor(idx/boardsize)
+    y = idx%boardsize
+    return (x,y)
     
-    _mark = 0
+def xy_to_idx(x,y):
+    idx = x*boardsize + y
+    return idx
     
-    def __init__(marker):
-        self._mark = marker
+def printboard(board):
+    outstr = ""
     
-    def move(board):
-        print("Player " + str(self._mark) + "'s turn to move")
-        print ("\n")
+    for i in range(boardsize):
+        if i > 0 :
+            outstr += "--------------\n"
         
-        
-        
+        for j in range(boardsize):
+            
+            if j > 0:
+                outstr += "|"
+            outstr += " "
+            if board[i][j] == -1:
+                outstr += " X "
+            elif board[i][j] == 0:
+                outstr += " " + str(xy_to_idx(i,j)) + " "
+            elif board[i][j] == 1:
+                outstr += " O "
+            outstr += "\n"
+            
+    print(outstr)
+    return
+            
+def checkmove(board,idx):
+    if (idx < 0) or (idx > boardsize*boardsize):
+        print("invalid move (" + str(idx) + "), try again")
+        return False
+    
+    mx,my = idx_to_xy(idx)
+    
+    if board[mx][my] == 0:
+        return True
+    else:
+        print("invalid move (" + str(idx) + "), try again")
+        return False

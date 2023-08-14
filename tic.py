@@ -9,7 +9,7 @@ from math import(floor)
 boardsize = 3
 
 def run_game(px,po):
-    
+    print("Starting Game")
     #clear board - -1 is X, +1 is 0
     board = [[0,0,0],[0,0,0],[0,0,0]]
     
@@ -33,18 +33,24 @@ def run_game(px,po):
             board[mx][my] = curr_player
         
         #check for victory
+        sumdiag1 = 0
+        sumdiag2 = 0
         #rows and cols
         for i in range(boardsize):
-            if board[i][0] == board[i][1] and board[i][0] == board[i][2]:
+            sumrow = 0
+            sumcol = 0
+            
+            for j in range(boardsize):
+                sumrow += board[i][j]
+                sumcol += board[j][i]
+            if (abs(sumrow) == boardsize) or (abs(sumcol)==boardsize):
                 game_state = curr_player
-            if board[0][i] == board[1][i] and board[0][i] == board[2][i]:
-                game_state = curr_player
-        #check diagonals
-            if board[0][0] == board[1][1] and board[0][0] == board[2][2]:
-                game_state = curr_player
-            if board[2][0] == board[1][1] and board[2][0] == board[0][2]:
-                game_state = curr_player
+            sumdiag1 += board[i][i]
+            sumdiag2 += board[i][boardsize-i-1]
         
+        if (abs(sumdiag1) == boardsize) or (abs(sumdiag2) == boardsize):
+            game_state = curr_player
+                          
         #check if board is full
         board_full = True
         for i in range(boardsize):
@@ -52,8 +58,10 @@ def run_game(px,po):
                 if board[i][j] == 0:
                     board_full = False
         
-        if board_full == True:
+        if (board_full == True) and (game_state == 0):
             game_state = 2
+        
+        #switch active player
         curr_player *= -1
     
     #game is over
@@ -68,6 +76,12 @@ def run_game(px,po):
         po.tie(board)
     
     return
+
+def mark_to_char(mark):
+    if mark == -1:
+        return 'X'
+    else:
+        return 'O'
 
 def idx_to_xy(idx):
     x = floor(idx/boardsize)
@@ -96,7 +110,7 @@ def printboard(board):
                 outstr += " " + str(xy_to_idx(i,j)) + " "
             elif board[i][j] == 1:
                 outstr += " O "
-            outstr += "\n"
+        outstr += "\n"
             
     print(outstr)
     return

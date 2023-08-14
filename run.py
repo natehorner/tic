@@ -8,7 +8,6 @@ Created on Sun Aug 13 17:41:11 2023
 import players
 import tic
 
-
 px = players.pc_player(-1)
 po = players.consec_player(1)
 

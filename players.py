@@ -4,9 +4,9 @@ Created on Sun Aug 13 17:12:30 2023
 
 @author: Nate
 """
-
+import random
 from abc import ( ABC, abstractmethod )
-from tic import (printboard,checkmove,xy_to_idx,mark_to_char)
+from tic import (printboard,checkmove,xy_to_idx,mark_to_char,idx_to_xy)
 
 class player(ABC):
 
@@ -103,6 +103,7 @@ class consec_player(player):
 
 
 #learning player
+#Can't switch from X to O! Won't understand!
 class learning_player(player):
     _mark = 0
     states = []
@@ -118,6 +119,15 @@ class learning_player(player):
             arr.extend(board[i])
         return str(arr)
     
+    def board_copy(self,board):
+        outboard = []
+        for i in range(len(board)):
+            outarr = []
+            for j in range(len(board[0])):
+                outarr.append(board[i][j])
+            outboard.append(outarr)
+        return outboard
+    
     def __init__(self, marker):
         self._mark = marker
         self.states = []
@@ -126,20 +136,85 @@ class learning_player(player):
     
     def move(self, board):
         
+        idx = -1
+        use_random = False
+        next_move_hash = 0
+        
         #check if it will experiment and act randomly
+        if random.random() <= self.rand_rate :
+            use_random = True    
+                
+        else:
+            val_max = 0
+            
+            #for each possible next move...
+            for i in range(len(board)):
+                for j in range(len(board[0])):
+                    
+                    #if the space is open...
+                    if board[i][j] == 0 :        
+                        #search for each in memory for best next move
+                        next_board = self.board_copy(board)
+                        next_board[i][j] = self._mark
+                        next_board_hash = self.board_to_hash(next_board)
+                        
+                        next_move_val = self.state_to_val.get(next_board_hash)
+                        if next_move_val != None:
+                            if next_move_val > val_max:
+                                val_max= next_move_val
+                                next_move_hash = next_board_hash
+                                idx = xy_to_idx(i,j)
+            
+            #if none found >0 use random number
+            if val_max == 0:
+                use_random = True
+            else:
+                print("Found move value " + str(val_max) + " idx " + str(idx))
+                pass
+            
+        #if random output
+        if use_random == True:
+            #find all possible moves
+            moves = []
+            for i in range(len(board)):
+                for j in range(len(board[0])):
+                    if board[i][j] == 0:
+                        moves.append(xy_to_idx(i,j))
+                    else:
+                        #print("Space taken")
+                        pass
+            num_moves = len(moves)-1
+            #print("number of moves " + str(num_moves))
+            idx = random.randint(0,num_moves)
+            next_board = self.board_copy(board)
+            i,j = idx_to_xy(idx)
+            next_board[i][j] = self._mark
+            next_move_hash = self.board_to_hash(next_board)
+            #print("Random experiment idx = " + str(idx))
         
+        #insert next move on the state list and return
+        self.states.append(next_move_hash)
+        return idx
+    
+    def remember_game(self,reward):
+        for state in reversed(self.states):
+            
+            if self.state_to_val.get(state) == None:
+                self.state_to_val[state] = 0
+            
+            self.state_to_val[state] += self.learn_rate*(reward*self.decay_rate - self.state_to_val[state])
         return
-        
+    
     def winner(self, board):
-
+        self.remember_game(1)
         return
      
     def loser(self, board):
-
+        self.remember_game(0)
         return
 
     def tie(self, board):
-
+        self.remember_game(0.1)
         return
     
 

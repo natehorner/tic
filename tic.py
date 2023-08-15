@@ -9,7 +9,7 @@ from math import(floor)
 boardsize = 3
 
 def run_game(px,po):
-    print("Starting Game")
+    #print("Starting Game")
     #clear board - -1 is X, +1 is 0
     board = [[0,0,0],[0,0,0],[0,0,0]]
     
@@ -31,6 +31,8 @@ def run_game(px,po):
         #make sure space isn't taken
         if board[mx][my] == 0:
             board[mx][my] = curr_player
+        else:
+            print("Illegal turn from player " + mark_to_char(curr_player))
         
         #check for victory
         sumdiag1 = 0
@@ -65,17 +67,20 @@ def run_game(px,po):
         curr_player *= -1
     
     #game is over
+    winner = 0
     if game_state == -1:
         px.winner(board)
         po.loser(board)
+        winner = -1
     elif game_state == 1:
         po.winner(board)
         px.loser(board)
+        winner = 1
     else :
         px.tie(board)
         po.tie(board)
-    
-    return
+
+    return winner
 
 def mark_to_char(mark):
     if mark == -1:

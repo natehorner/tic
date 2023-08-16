@@ -132,3 +132,25 @@ def checkmove(board,idx):
     else:
         print("invalid move (" + str(idx) + "), try again")
         return False
+
+def run_n_games(px,po,n):
+    xwin = 0
+    owin = 0
+    tie = 0
+    games = 0
+
+    for i in range(n):
+        score = run_game(px,po)
+        games += 1
+        if score == -1:
+            xwin += 1
+        elif score == 1:
+            owin += 1
+        else :
+            tie += 1
+
+    print("Score after " + str(games) + " games (X, O, Tie): " + str(xwin) + ", " 
+          + str(owin) + ", " + str(tie))
+
+    return
+    

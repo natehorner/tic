@@ -110,8 +110,8 @@ class learning_player(player):
     state_to_val = {}
     
     learn_rate = 0.2
-    rand_rate = 0.2
-    decay_rate = 0.95
+    rand_rate = 0.05
+    decay_rate = 0.9
     
     def board_to_hash(self,board):
         arr = []
@@ -161,7 +161,7 @@ class learning_player(player):
                         next_move_val = self.state_to_val.get(next_board_hash)
                         if next_move_val != None:
                             if next_move_val > val_max:
-                                val_max= next_move_val
+                                val_max = next_move_val
                                 next_move_hash = next_board_hash
                                 idx = xy_to_idx(i,j)
             
@@ -169,7 +169,7 @@ class learning_player(player):
             if val_max == 0:
                 use_random = True
             else:
-                print("Found move value " + str(val_max) + " idx " + str(idx))
+                #print("Found move value " + str(val_max) + " idx " + str(idx))
                 pass
             
         #if random output
@@ -184,8 +184,8 @@ class learning_player(player):
                         #print("Space taken")
                         pass
             num_moves = len(moves)-1
-            #print("number of moves " + str(num_moves))
-            idx = random.randint(0,num_moves)
+            #print("number of moves " + str(num_moves+1))
+            idx = moves[random.randint(0,num_moves)]
             next_board = self.board_copy(board)
             i,j = idx_to_xy(idx)
             next_board[i][j] = self._mark
@@ -198,11 +198,15 @@ class learning_player(player):
     
     def remember_game(self,reward):
         for state in reversed(self.states):
-            
+            prev_val = 0
             if self.state_to_val.get(state) == None:
                 self.state_to_val[state] = 0
+            else:
+                prev_val = self.state_to_val.get(state)
             
-            self.state_to_val[state] += self.learn_rate*(reward*self.decay_rate - self.state_to_val[state])
+            self.state_to_val[state] = prev_val + self.learn_rate*(reward*self.decay_rate - prev_val)
+            #print("Hsh " + state + "prev val = " + str(prev_val) + " new val = " + str(self.state_to_val[state]))
+        self.states.clear()
         return
     
     def winner(self, board):

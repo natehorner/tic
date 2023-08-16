@@ -204,7 +204,9 @@ class learning_player(player):
             else:
                 prev_val = self.state_to_val.get(state)
             
-            self.state_to_val[state] = prev_val + self.learn_rate*(reward*self.decay_rate - prev_val)
+            next_val = prev_val + self.learn_rate*(reward*self.decay_rate - prev_val)
+            self.state_to_val[state] = next_val
+            reward = next_val
             #print("Hsh " + state + "prev val = " + str(prev_val) + " new val = " + str(self.state_to_val[state]))
         self.states.clear()
         return
